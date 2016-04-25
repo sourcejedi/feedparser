@@ -183,12 +183,26 @@ except ImportError:
             data = data.replace(char, entity)
         return data
 else:
+    # libxml2 versions 2.9.2 and 2.9.3 had python3 bindings which didn't work
+    # check for "TypeError: 'str' does not support the buffer interface"
+    try:
+        parser = xml.sax.make_parser(["drv_libxml2"])
+        parser.parse(_StringIO("<a/>".encode('utf-8')))
+    except TypeError:
+        PREFERRED_XML_PARSERS.remove("drv_libxml2")
+    except:
+        # ignore any other error, because we will handle it (or die) next
+        pass
+
     try:
         xml.sax.make_parser(PREFERRED_XML_PARSERS) # test for valid parsers
     except xml.sax.SAXReaderNotAvailable:
         _XML_AVAILABLE = 0
     else:
         _XML_AVAILABLE = 1
+
+
+
 
 # sgmllib is not available by default in Python 3; if the end user doesn't have
 # it available then we'll lose illformed XML parsing and content santizing
