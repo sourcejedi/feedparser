@@ -83,6 +83,16 @@ RESOLVE_RELATIVE_URIS = 1
 # HTML content, set this to 1.
 SANITIZE_HTML = 1
 
+
+# libxml2 versions 2.9.2 and 2.9.3 had python3 bindings which didn't work
+# Check for "TypeError: 'str' does not support the buffer interface".
+try:
+    parser = xml.sax.make_parser(["drv_libxml2"])
+    parser.parse(_StringIO("<a/>".encode('utf-8')))
+except TypeError:
+    PREFERRED_XML_PARSERS.remove("drv_libxml2")
+
+
 _XML_AVAILABLE = True
 mixin.RESOLVE_RELATIVE_URIS = RESOLVE_RELATIVE_URIS
 mixin.SANITIZE_HTML = SANITIZE_HTML
